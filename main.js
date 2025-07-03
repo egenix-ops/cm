@@ -84,13 +84,13 @@ document.addEventListener("DOMContentLoaded", function () {
     .fromTo(
       navHamburgers,
       { scale: 1, opacity: 1 },
-      { scale: 0, opacity: 0, duration: 0.6, ease: "power2.out" }, // ✅ Nav hamburger schalen naar 0 + fade-out
+      { scale: 0, opacity: 0, duration: 0.6, ease: "power2.out" },
       "-=1.4"
     )
     .fromTo(
       navCloses,
       { scale: 0, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.6, ease: "power2.out" }, // ✅ Nav close knop schalen naar 1 + fade-in
+      { scale: 1, opacity: 1, duration: 0.6, ease: "power2.out" },
       "-=1.4"
     );
 
@@ -101,10 +101,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (menuOpen) {
           menuTimeline.timeScale(1).play();
-          console.log("✅ Menu geopend");
         } else {
           menuTimeline.timeScale(1.5).reverse();
-          console.log("❌ Menu gesloten");
         }
       });
     });
@@ -174,7 +172,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         event.preventDefault();
-        console.log("Nav-item clicked:", targetAttribute);
 
         activeItem = item;
         activeItem.classList.add("active");
@@ -192,7 +189,6 @@ document.addEventListener("DOMContentLoaded", function () {
     backButtons.forEach((button) => {
       button.addEventListener("click", function (event) {
         event.preventDefault();
-        console.log("Back button clicked");
 
         if (overlay) {
           overlay.style.transition = "transform 0.3s ease-in-out";
@@ -533,17 +529,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const excludeDot = element.getAttribute("data-dot") === "false";
     if (excludeDot) return;
 
-    let text = element.innerHTML.trim();
+    let html = element.innerHTML.trim();
 
-    let hasColoredDot = /<span[^>]*>\.<\/span>$/.test(text);
+    const endingRegex = /(?:<span[^>]*>)?([.!?])(?:<\/span>)?\s*$/;
 
-    if (hasColoredDot) {
-      element.innerHTML = text.replace(
-        /<span[^>]*>\.<\/span>$/,
-        '<span style="color: #ff6720;">.</span>'
-      );
-    } else if (!text.endsWith(".")) {
-      element.innerHTML = text + '<span style="color: #ff6720;">.</span>';
+    if (endingRegex.test(html)) {
+      html = html.replace(endingRegex, '<span style="color: #ff6720;">$1</span>');
+      element.innerHTML = html;
+    } else {
+      element.innerHTML = html + '<span style="color: #ff6720;">.</span>';
     }
   });
 });
