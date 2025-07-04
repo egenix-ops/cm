@@ -431,12 +431,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll("[data-form='validation']").forEach((form) => {
-    const submitBtns = form.querySelectorAll(".btn.is-form"); // Selecteer alle submit buttons
+    const submitBtns = form.querySelectorAll(".btn.is-form");
 
     function checkValidation() {
       let isValid = true;
 
-      // Controleer input, textarea, email, tel, number, url, date
+      // Check standaard inputs
       form
         .querySelectorAll(
           "[form-validation='input'], [form-validation='textarea'], [form-validation='email'], [form-validation='tel'], [form-validation='number'], [form-validation='url'], [form-validation='date']"
@@ -445,7 +445,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (!input.value.trim()) isValid = false;
         });
 
-      // Controleer radio groups (één moet geselecteerd zijn)
+      // Check radio groups
       form
         .querySelectorAll("[form-validation='radio-group']")
         .forEach((group) => {
@@ -453,45 +453,54 @@ document.addEventListener("DOMContentLoaded", function () {
           if (![...radios].some((radio) => radio.checked)) isValid = false;
         });
 
-      // Controleer checkbox groups (minimaal één moet geselecteerd zijn)
+      // Check checkbox groups
       form
         .querySelectorAll("[form-validation='checkbox-group']")
         .forEach((group) => {
           const checkboxes = group.querySelectorAll("input[type='checkbox']");
-          if (![...checkboxes].some((checkbox) => checkbox.checked))
-            isValid = false;
+          if (![...checkboxes].some((checkbox) => checkbox.checked)) isValid = false;
         });
 
-      // Controleer single checkboxes (moeten aangevinkt zijn als ze required zijn)
+      // Check losse checkboxes
       form
         .querySelectorAll("[form-validation='checkbox']")
         .forEach((checkbox) => {
           if (!checkbox.checked) isValid = false;
         });
 
-      // Controleer select dropdowns
+      // Check select dropdowns
       form.querySelectorAll("[form-validation='select']").forEach((select) => {
         if (!select.value) isValid = false;
       });
 
-      // Controleer file uploads
+      // Check file uploads
       form.querySelectorAll("[form-validation='file']").forEach((fileInput) => {
         if (!fileInput.files.length) isValid = false;
       });
 
-      // Update alle submit buttons
+      // ✅ Check of reCAPTCHA succesvol is
+      const captchaInput = form.querySelector('textarea[name="g-recaptcha-response"]');
+      if (captchaInput && captchaInput.value.trim() === "") {
+        isValid = false;
+      }
+
+      // Update de submitknop
       submitBtns.forEach((btn) => {
-        if (isValid) {
-          btn.classList.add("cc-active");
-        } else {
-          btn.classList.remove("cc-active");
-        }
+        btn.classList.toggle("cc-active", isValid);
       });
     }
 
-    // Event listeners voor live validatie
+    // Live validatie
     form.addEventListener("input", checkValidation);
     form.addEventListener("change", checkValidation);
+
+    // Bonus: ook op interval checken (voor als reCAPTCHA async geladen is)
+    const intervalId = setInterval(() => {
+      if (!document.body.contains(form)) {
+        clearInterval(intervalId); // stop interval als formulier verwijderd is
+      }
+      checkValidation();
+    }, 500);
   });
 });
 
